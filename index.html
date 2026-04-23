@@ -440,13 +440,35 @@ function loadUrl(url) {
   // youtu.be/ID  |  youtube.com/watch?v=ID  |  youtube.com/shorts/ID
   const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/))([A-Za-z0-9_-]{11})/);
   if (ytMatch) {
-    const id   = ytMatch[1];
+    const id  = ytMatch[1];
     const wrap = document.createElement('div');
-    wrap.className = 'yt-wrap';
-    wrap.innerHTML = `<iframe
-      src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1"
-      allow="autoplay; encrypted-media"
-      allowfullscreen></iframe>`;
+    wrap.style.cssText = 'width:100%;position:relative;background:#0a0a0a;border-radius:8px;overflow:hidden;';
+
+    // Hidden iframe (1px, off-screen) – audio plays, video invisible
+    const iframe = document.createElement('iframe');
+    iframe.id = 'yt-iframe';
+    iframe.style.cssText = 'position:absolute;width:1px;height:1px;top:0;left:0;opacity:0;pointer-events:none;border:none;';
+    iframe.allow = 'autoplay; encrypted-media';
+    wrap.appendChild(iframe);
+
+    // Visible overlay
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'width:100%;height:200px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;cursor:pointer;';
+    overlay.innerHTML = `
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(230,57,70,0.5)">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="white" style="margin-left:4px"><polygon points="5,3 19,12 5,21"/></svg>
+      </div>
+      <div style="font-family:var(--font-display);font-size:16px;letter-spacing:.15em;color:#666">TIPPEN ZUM ABSPIELEN</div>`;
+
+    overlay.onclick = function() {
+      // Load src on user gesture = autoplay allowed
+      iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1&rel=0&modestbranding=1&playsinline=1&controls=0&enablejsapi=1';
+      overlay.innerHTML = '<div style="font-size:48px;animation:pulse 1.5s ease-in-out infinite">🎵</div><div style="font-family:var(--font-display);font-size:18px;letter-spacing:.15em;color:#666;margin-top:8px">LÄUFT…</div>';
+      overlay.style.cursor = 'default';
+      overlay.onclick = null;
+    };
+
+    wrap.appendChild(overlay);
     container.appendChild(wrap);
     return;
   }
