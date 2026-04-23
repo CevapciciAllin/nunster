@@ -284,10 +284,8 @@ function startQRLoop() {
   const canvas = document.getElementById('qr-canvas');
   const ctx    = canvas.getContext('2d', { willReadFrequently: true });
 
-  // Use setInterval instead of requestAnimationFrame – more reliable on Android
   scanLoop = setInterval(function() {
     if (scanLocked) return;
-
     if (video.readyState >= 2 && video.videoWidth > 0) {
       const w = video.videoWidth;
       const h = video.videoHeight;
@@ -307,14 +305,11 @@ function startQRLoop() {
         }
       } catch(e) {}
     }
-    scanLoop = requestAnimationFrame(tick);
-  }
-
-  scanLoop = requestAnimationFrame(tick);
+  }, 150);
 }
 
 function stopScan() {
-  if (scanLoop) { clearInterval(scanLoop); cancelAnimationFrame(scanLoop); scanLoop = null; }
+  if (scanLoop) { clearInterval(scanLoop); scanLoop = null; }
   if (videoStream) {
     videoStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
     videoStream = null;
