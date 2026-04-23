@@ -98,26 +98,20 @@ html, body { height: 100%; background: var(--black); color: var(--white); font-f
 .player-header-title { font-family: var(--font-display); font-size: 22px; letter-spacing: .1em; }
 .btn-new { background: var(--surface); border: 1px solid var(--border); color: var(--white); border-radius: 3px; padding: 8px 16px; font-size: 13px; cursor: pointer; }
 
-.player-content { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 12px 20px 24px; gap: 14px; overflow-y: auto; }
+.player-content { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px; gap: 20px; justify-content: center; overflow-y: auto; }
 
-.embed-wrap { width: 100%; border-radius: 8px; overflow: hidden; background: #000; flex-shrink: 0; }
+.embed-wrap { width: 100%; border-radius: 8px; overflow: hidden; background: #000; flex-shrink: 0; position: relative; }
 .embed-wrap iframe { width: 100%; border: none; display: block; }
+.embed-cover { position: absolute; inset: 0; background: #0a0a0a; z-index: 2; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+.embed-cover .music-icon { font-size: 48px; animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:.4;transform:scale(1)} 50%{opacity:1;transform:scale(1.08)} }
+.embed-cover .playing-text { font-family: var(--font-display); font-size: 18px; letter-spacing: .15em; color: var(--muted); }
 .yt-wrap { width: 100%; border-radius: 8px; overflow: hidden; background: #000; aspect-ratio: 16/9; flex-shrink: 0; }
 .yt-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
-.reveal-card { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
-.reveal-hidden { padding: 28px 20px; text-align: center; cursor: pointer; user-select: none; }
 .reveal-hidden:active { background: #222; }
-.reveal-eye { font-size: 36px; display: block; margin-bottom: 10px; filter: grayscale(1) opacity(.5); }
-.reveal-cta { font-family: var(--font-display); font-size: 20px; letter-spacing: .1em; color: var(--muted); }
-.reveal-sub { font-size: 11px; color: #444; margin-top: 6px; letter-spacing: .08em; text-transform: uppercase; }
 
-.reveal-shown { display: none; padding: 24px 20px; text-align: center; animation: fadeUp .4s ease; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-.reveal-artist { font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
-.reveal-year { font-family: var(--font-display); font-size: clamp(64px,18vw,88px); color: var(--yellow); line-height: 1; letter-spacing: .04em; }
-.reveal-divider { width: 40px; height: 2px; background: var(--red); margin: 12px auto; }
-.reveal-title { font-size: 15px; font-style: italic; color: var(--white); opacity: .85; }
+ to{opacity:1;transform:translateY(0)} }
 
 .btn-next { width: 100%; background: var(--red); color: #fff; border: none; border-radius: 3px; padding: 16px; font-family: var(--font-display); font-size: 24px; letter-spacing: .1em; cursor: pointer; flex-shrink: 0; }
 .btn-next:active { background: #c8303c; }
@@ -210,20 +204,6 @@ html, body { height: 100%; background: var(--black); color: var(--white); font-f
   </div>
   <div class="player-content">
     <div id="embed-container"></div>
-    <div class="reveal-card" id="reveal-card">
-      <div class="reveal-hidden" id="reveal-hidden" onclick="revealInfo()">
-        <span class="reveal-eye">👁</span>
-        <div class="reveal-cta">AUFLÖSUNG</div>
-        <div class="reveal-sub">Tippen zum Aufdecken</div>
-      </div>
-      <div class="reveal-shown" id="reveal-shown">
-        <div class="reveal-artist" id="info-artist"></div>
-        <div class="reveal-year"   id="info-year">?</div>
-        <div class="reveal-divider"></div>
-        <div class="reveal-title"  id="info-title"></div>
-      </div>
-    </div>
-    <button class="btn-next" onclick="goHome()">NÄCHSTE KARTE ›</button>
     <div class="url-display" id="url-display"></div>
   </div>
 </div>
@@ -435,7 +415,11 @@ function loadUrl(url) {
       src="https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0"
       height="${h}"
       allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-      loading="lazy"></iframe>`;
+      loading="lazy"></iframe>
+      <div class="embed-cover">
+        <div class="music-icon">🎵</div>
+        <div class="playing-text">LÄUFT…</div>
+      </div>`;
     container.appendChild(wrap);
     return;
   }
@@ -475,29 +459,6 @@ function showExternalLink(container, url, label) {
     <p style="margin-top:12px;font-size:10px;color:#444;word-break:break-all">${url}</p>
   `;
   container.appendChild(box);
-}
-
-// ══════════════════════════════════════════
-// REVEAL
-// ══════════════════════════════════════════
-function resetReveal() {
-  document.getElementById('reveal-hidden').style.display = '';
-  document.getElementById('reveal-shown').style.display  = 'none';
-}
-
-function revealInfo() {
-  document.getElementById('reveal-hidden').style.display = 'none';
-  document.getElementById('reveal-shown').style.display  = '';
-
-  if (revealData.year || revealData.artist) {
-    document.getElementById('info-artist').textContent = revealData.artist || '';
-    document.getElementById('info-year').textContent   = revealData.year   || '?';
-    document.getElementById('info-title').textContent  = revealData.title  || '';
-  } else {
-    document.getElementById('info-artist').textContent = '';
-    document.getElementById('info-year').textContent   = '?';
-    document.getElementById('info-title').textContent  = 'Infos im Player oben sichtbar';
-  }
 }
 
 function clearEmbed() {
