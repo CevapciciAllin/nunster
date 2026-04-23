@@ -472,12 +472,17 @@ function clearEmbed() {
   document.getElementById('url-display').textContent   = '';
 }
 function openSpotify(uri, webUrl) {
-  // Try to open the app via URI scheme; fall back to web URL
-  window.location.href = uri;
-  setTimeout(() => {
-    // If app didn't open (still on this page), open web player
-    window.open(webUrl, '_blank');
-  }, 1500);
+  // Android intent URI – opens Spotify app directly
+  const intentUrl = 'intent://open.spotify.com/track/' + webUrl.split('/track/')[1]
+    + '#Intent;scheme=https;package=com.spotify.music;end';
+  const a = document.createElement('a');
+  a.href = intentUrl;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  // Fallback: if app not installed, open web after delay
+  setTimeout(() => { window.open(webUrl, '_blank'); }, 2500);
 }
 
 function startPlayback(overlay, iframeSrc) {
