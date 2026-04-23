@@ -315,9 +315,9 @@ function startQRLoop() {
           scanLocked = true;
           cancelAnimationFrame(scanLoop);
           scanLoop = null;
-          stopScan();
-          // small delay so stopScan can finish releasing camera
-          setTimeout(() => handleScannedData(raw), 150);
+          // Handle data immediately, stop camera in background
+          handleScannedData(raw);
+          setTimeout(() => stopScan(), 300);
           return;
         }
       }
