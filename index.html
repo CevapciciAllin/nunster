@@ -417,20 +417,15 @@ function loadUrl(url) {
     const h    = (type === 'track' || type === 'episode') ? 152 : 352;
     const wrap = document.createElement('div');
     wrap.className = 'embed-wrap';
-    const iframeSrc = `https://open.spotify.com/embed/${type}/${id}?utm_source=generator&theme=0`;
+    const spotifyUri  = `spotify:track:${id}`;
+    const spotifyWeb  = `https://open.spotify.com/track/${id}`;
+    wrap.style.background = 'transparent';
     wrap.innerHTML = `
-      <iframe id="sp-iframe" src="" height="${h}"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        style="display:block;width:100%;border:none"></iframe>
-      <div class="play-btn-wrap" id="play-overlay" onclick="startPlayback(this, '${iframeSrc}')">
+      <div class="play-btn-wrap" onclick="openSpotify('${spotifyUri}', '${spotifyWeb}')">
         <div class="play-btn-circle">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
         </div>
-        <div class="play-btn-label">TIPPEN ZUM ABSPIELEN</div>
-      </div>
-      <div class="embed-cover" id="now-playing-cover" style="display:none">
-        <div class="music-icon">🎵</div>
-        <div class="playing-text">LÄUFT…</div>
+        <div class="play-btn-label">IN SPOTIFY ABSPIELEN</div>
       </div>`;
     container.appendChild(wrap);
     return;
@@ -477,6 +472,15 @@ function clearEmbed() {
   document.getElementById('embed-container').innerHTML = '';
   document.getElementById('url-display').textContent   = '';
 }
+function openSpotify(uri, webUrl) {
+  // Try to open the app via URI scheme; fall back to web URL
+  window.location.href = uri;
+  setTimeout(() => {
+    // If app didn't open (still on this page), open web player
+    window.open(webUrl, '_blank');
+  }, 1500);
+}
+
 function startPlayback(overlay, iframeSrc) {
   // Load iframe src on tap = counts as user gesture = autoplay works
   const iframe = overlay.parentElement.querySelector('#sp-iframe');
