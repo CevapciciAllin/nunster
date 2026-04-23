@@ -227,7 +227,6 @@ function showScreen(id) {
 
 function goHome() {
   clearEmbed();
-  resetReveal();
   showScreen('screen-home');
 }
 
@@ -239,12 +238,7 @@ function stopScanGoHome() {
 // ══════════════════════════════════════════
 // DEBUG (shown on-screen for mobile diagnosis)
 // ══════════════════════════════════════════
-function dbg(msg) {
-  const bar = document.getElementById('debug-bar');
-  if (!bar) return;
-  bar.style.display = 'block';
-  bar.textContent = msg;
-}
+function dbg(msg) {}
 
 // ══════════════════════════════════════════
 // CAMERA
@@ -374,7 +368,6 @@ function tryDecode(s) {
 function loadUrl(url) {
   if (!url) { goHome(); return; }
 
-  resetReveal();
   clearEmbed();
   showScreen('screen-player');
   document.getElementById('url-display').textContent = url;
