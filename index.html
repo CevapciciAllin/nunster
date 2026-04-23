@@ -444,11 +444,12 @@ function loadUrl(url) {
     const wrap = document.createElement('div');
     wrap.style.cssText = 'width:100%;position:relative;background:#0a0a0a;border-radius:8px;overflow:hidden;';
 
-    // Hidden iframe (1px, off-screen) – audio plays, video invisible
+    // Hidden iframe – audio plays, video invisible
     const iframe = document.createElement('iframe');
     iframe.id = 'yt-iframe';
-    iframe.style.cssText = 'position:absolute;width:1px;height:1px;top:0;left:0;opacity:0;pointer-events:none;border:none;';
+    iframe.style.cssText = 'display:none;border:none;';
     iframe.allow = 'autoplay; encrypted-media';
+    iframe.setAttribute('allowfullscreen', '');
     wrap.appendChild(iframe);
 
     // Visible overlay
