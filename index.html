@@ -283,44 +283,29 @@ function startQRLoop() {
   const video  = document.getElementById('camera-video');
   const canvas = document.getElementById('qr-canvas');
   const ctx    = canvas.getContext('2d', { willReadFrequently: true });
-  let frameCount = 0;
 
-  function tick() {
+  // Use setInterval instead of requestAnimationFrame – more reliable on Android
+  scanLoop = setInterval(function() {
     if (scanLocked) return;
 
-    frameCount++;
-    if (frameCount % 3 !== 0) {          // scan every 3rd frame (~10fps) to save CPU
-      scanLoop = requestAnimationFrame(tick);
-      return;
-    }
-
-    if (video.readyState >= 2) {          // HAVE_CURRENT_DATA or better
+    if (video.readyState >= 2 && video.videoWidth > 0) {
       const w = video.videoWidth;
       const h = video.videoHeight;
-      if (w > 0 && h > 0) {
-        canvas.width  = w;
-        canvas.height = h;
+      canvas.width  = w;
+      canvas.height = h;
+      try {
         ctx.drawImage(video, 0, 0, w, h);
-        let imageData;
-        try {
-          imageData = ctx.getImageData(0, 0, w, h);
-        } catch(e) {
-          scanLoop = requestAnimationFrame(tick);
-          return;
-        }
+        const imageData = ctx.getImageData(0, 0, w, h);
         const code = jsQR(imageData.data, w, h, { inversionAttempts: 'dontInvert' });
         if (code && code.data) {
           const raw = code.data.trim();
           dbg('QR: ' + raw);
           scanLocked = true;
-          cancelAnimationFrame(scanLoop);
+          clearInterval(scanLoop);
           scanLoop = null;
-          // Do NOT call stopScan() here – it blocks on Android.
-          // Camera will be stopped when user hits "Neu scannen".
           handleScannedData(raw);
-          return;
         }
-      }
+      } catch(e) {}
     }
     scanLoop = requestAnimationFrame(tick);
   }
@@ -329,7 +314,7 @@ function startQRLoop() {
 }
 
 function stopScan() {
-  if (scanLoop) { cancelAnimationFrame(scanLoop); scanLoop = null; }
+  if (scanLoop) { clearInterval(scanLoop); cancelAnimationFrame(scanLoop); scanLoop = null; }
   if (videoStream) {
     videoStream.getTracks().forEach(t => { try { t.stop(); } catch(e){} });
     videoStream = null;
