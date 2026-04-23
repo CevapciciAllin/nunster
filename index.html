@@ -315,8 +315,9 @@ function startQRLoop() {
           scanLocked = true;
           cancelAnimationFrame(scanLoop);
           scanLoop = null;
-          stopScan();
-          setTimeout(() => handleScannedData(raw), 150);
+          // Do NOT call stopScan() here – it blocks on Android.
+          // Camera will be stopped when user hits "Neu scannen".
+          handleScannedData(raw);
           return;
         }
       }
